@@ -1,0 +1,2 @@
+Qn: what if file is opened in read and append mode?
+    file will be opened in read mode and append mode will be discarded
