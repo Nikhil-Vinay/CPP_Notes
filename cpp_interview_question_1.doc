@@ -1,0 +1,1255 @@
+<bits/stdc++.h> in C++ It is basically a header file that includes every standard library. 
+In programming contests, using this file is a good idea, when you want to reduce the time wasted in doing 
+chores; especially when your rank is time sensitive.
+
+#include<bits/stdc++.h>
+
+/**************** How do you call C functions from C++? ********************************/
+
+Difference between C and C++ functions are : C++ function can be overloaded and C function doesn't support
+overloading so, declaring a C function inside C++ code means, we tell to compiler that don't make this function
+overloadable.
+
+We use this keyword in function declaration for this purpose: extern "C"
+Example: extern "C" void foo();   // for single function declartion
+         extern "C" {             // for multiple function declaration
+            void foo1();
+            double foo2();
+         }
+
+function calling happens normally as usual.
+
+/*************** Static Function ***********************************************/
+
+Question: Can a static function non-static variable member of a class?
+
+The answer here is no. What is the reason? Well, because non-static member variables of a class always belong 
+to an object – meaning that every object has it’s own personal copy of non-static member variables (also known 
+as instance variables). And, static functions have no object to work with since they belong to the class as a 
+whole. Remember that you can call a static function without an object – and for that exact reason a static 
+function can not call instance variables.
+
+Question: Do static functions have a “this” pointer?
+
+No, they do not. Because a static function can be called without using an object, the “this” pointer is not passed into the function. Remember that the “this” pointer is only used when a class is instantiated as an object.
+
+class A
+{
+   int a;
+   static int b;
+   public:
+   A(int in):a(in) { } 
+   static void display() {
+ //  cout<<"Inside atatic fucntion, a: "<<a<<endl;  // static function can't modifiy non-static data as
+                                                    // all non static data is acceesed by this pointer and
+                                                    // static function don't have this. Ex: here, this->a
+     cout<<"Inside atatic fucntion, b: "<<b<<endl;
+   }   
+
+   static void display2(A &obj) {
+     cout<< "value is: "<<obj.a<<" "<<obj.b<<endl;  // we can access non-static data by an object in static function
+   }
+};
+
+int A::b = 1;
+
+int main()
+{
+
+  A obj(5);
+  A obj2(10);
+  A::display();
+  A::display2(obj2);
+  return 0;
+}
+
+/**** Can a class have object of self ***************/
+
+A class declaration can contain static object of self type, it can also have pointer to self type, 
+but it cannot have a non-static object of self type.
+A class can have vector, map etc of self type also.
+
+class Test { 
+  static Test self; // ok
+  Test *self;       // ok
+}
+
+class Test { 
+  Test self; // Error 
+};
+
+Reason: If a class will have own non-static object as a data memeber. When object of this class will be created.
+It will go recursively and won't stop anywhere so compiler doesn't allow this.
+
+/****************** Overloading assignment operator ************************/
+
+Myclass& operator = (const Myclass& obj) {
+   if(this == &obj) {
+      return obj;         // protect from copying to self, very important
+   }
+   .....
+   .....
+}
+
+/******* Initialize a vector ************************/
+
+  std::vector<int> first;                                // empty vector of ints
+  std::vector<int> second (4,100);                       // four ints with value 100
+  std::vector<int> third (second.begin(),second.end());  // iterating through second
+  std::vector<int> fourth (third);                       // a copy of third
+
+  // the iterator constructor can also be used to construct from arrays:
+  int myints[] = {16,2,77,29};
+  std::vector<int> fifth (myints, myints + sizeof(myints) / sizeof(int) );
+
+/*********** Conversion Constructor ******************/
+
+class A 
+{
+  int a;
+  public:
+  A(int val) : a(val) { };  // This is the way initialize const data member // Just FYI
+}
+
+int main() {
+  A obj = 12;   // conversion constructor gets called.
+}
+
+Note: We can stop it by using explicit.
+This implicit conversion happend only when single parameter constructor is available. Implicit constructor
+doesn't happen with more than one parameterized constructor.
+
+/***************8 Conversion Operator ********************/
+
+class A
+{
+   int a;
+   public:
+   A (int val) : a(val) { };
+   operator int() {
+      return a;
+   }
+}
+
+int main
+{
+   A obj(12);
+   int x = (int)(obj);  /* conversion operator */
+
+/****************** Functor Class ****************************/
+
+class A
+{
+   int a;
+   public:
+   A(int val) : a(val) { };
+   int operator() (int b) {
+     return a+b;
+   }
+};
+
+int main()
+{
+  A obj(5);
+  cout << obj(6);  // 11
+}
+
+Note: Functor = Function + Pointer
+It behaves like function pointer
+Limitation of function pointer: It must fully satisfy at compile time.
+It gets used as compatator in all STL class though simple function which returns true or false is also used for
+same purpose.
+   
+}
+
+/************** Using Function Pointer ******************8/
+
+vector<int> find_matching_pattern(vector<int> vec, bool (*pred)(int*))
+{
+  vector<int> ret_vec;
+  vector<int>::iterator itr = vec.begin();
+  while(itr != vec.end()) {
+    if(pred(*itr)) {
+      ret_vec.push_back(*itr);
+    }
+    ++itr;
+  }
+  return ret_vec;
+}
+
+/***************** Using Functor **************************/
+
+vector<int> find_matching_pattern(vector<int> vec, Functor pred)
+{
+  vector<int> ret_vec;
+  vector<int>::iterator itr = vec.begin();
+  while(itr != vec.end()) {
+    if(pred(*itr)) {
+      ret_vec.push_back(*itr);
+    }
+    ++itr;
+  }
+  return ret_vec;
+}
+
+/********** Templating second argument *********************/
+
+template<typename functype>
+vector<int> find_matching_pattern(vector<int> vec, functype pred)
+{
+   .........
+   .........
+}
+
+/************** Functor vs virtual function ****************/
+
+It is achieved by adding one extra argument
+template<typename functype>
+int do_it (int x, int y, functype func) {
+   return func(x+y);
+}
+
+/************ Comparator class *******************************/
+
+struct cmp
+{
+  bool operator(const portfolioId_t pf1, const portfolioId_t pf2) {
+     return strcmp(pf2.portfolio_name.c_str(), pf2.portfolio_name.c_str()) > 0;
+  }
+}
+
+map <portfolioId_t pf_list, portfolioList_t pf_details, cmp> pf_map;
+typedef struct portfolioId_s
+{
+  string portfolio_name;
+  int32 portfolio_id;
+}portfolioId_t;
+
+/********************Miscellaneous ********************8/
+
+#include<algorithm>
+#include<vector>
+
+int myints[] = { 32, 71, 73, 75 };
+std::vectpr<int> vec (myints, myints+8);
+std::sort(vec.begin(), vec.begin() + 4);
+
+// using own comparator
+std::sort(vec.bein(), vec.end(), mycmp);
+
+//using own comparator with constructor
+std::sort(vec.begin(), vec.end(), mycmp(4));
+
+// With pair , we need to provide typename of key and value
+
+map<string, int> my_map;
+
+my_map.insert(pair<string, int> ("Nikhil", 20));
+my_map.insert(make_pair("Nikhil", 20));
+
+// Lower_bound, upper_bound
+
+int myints[] = {10, 20, 50, 30, 40, 40, 50};
+vector<int> v (myints, myints+6);
+std::sort(v.begin(), v.end());
+
+std::vector<int>::iterator low, up;
+low = std::lower_bound(v.begin(), v.end(), 40);
+low = std::upper_bound(v.begin(), v.end(), 40);
+
+cout<< "lower bound position "<<(low - v.begin())<<endl;
+
+// for vector, #include <algorithm>
+
+// for map or set
+map.lower_bound(20);
+
+// Use of multimap
+
+multimap<string, int> my_multimap;
+set<string> my_set;
+set<string>::iterator set_otr;
+
+multimap<string, int>::iterator multimap_itr;
+
+pair<multimap<string,int>::iterator, multimap<string,int>::iterator> bound;
+
+for(set_itr = my_set.begin(); set_itr != my_set.end(); set_itr++) {
+  bound = my_multimap.equal_range(*set_itr);
+  for(multimap_itr = bound.first, multimap_itr != bound.second; multimap_itr++) {
+     ....
+  }
+}
+
+/********************* SMART POINTER ********************************88/
+
+template<typename T>
+class SP
+{
+  T *pdata;
+  public:
+  SP(T* val) {
+    pdata = val;
+  }
+
+  ~SP {
+    delete pdata;
+  }
+
+  T& operator *() {
+     retrurn *pdata;
+  }
+
+  T* operator ->() {
+     return pdata;
+  } 
+}
+
+SP<Person> p(new Person("scott", 25));
+p->Display();
+
+/******************** DESIGN PATTERNS ****************************/
+/**************** SINGLETON *****************/
+
+class A
+{
+  static A* obj;
+  // constructor, copy constructor, assignment operator are private
+  A() { };
+  A(const A& obj) { };
+  A& operator = (const A&obj) { };
+
+  public:
+  static A* Create_Obj() {   // check here for mutex locking
+    // lock mutex
+    if(obj == NULL) {
+      obj = new A();
+    }
+    // release mutex
+    return A::obj;
+  }
+};
+
+A* A::obj = NULL;
+}
+
+/************** Abstract Factory Pattern *********************/
+
+class vehicle   // interface
+{
+   // pure virtual functions 
+}
+
+class FactoryClass
+{
+  public:
+  static vechicle& factory(enum a) {
+     switch(a) {
+       case x: return *(new car());
+               break;
+       case y: return *(new bike());
+               break;
+     }
+  }
+}
+
+/******************* DECORATOR PATTERN ************************/
+
+// Interface
+class Coffee
+{
+  public:
+  virtual getCost() = 0;
+  virtual getIngredient() = 0;
+};
+
+// Concrete Class
+class SampleCoffee : public Coffee
+{
+  public:
+  int getCost() {
+     return 1;
+  }
+
+  void getIngredient() {
+    cout << "Simple Coffee" <<endl;
+  }
+};
+
+// Derived Decorator class from interface
+
+class Decorator : public Coffee
+{
+  Coffee* coffee_ptr;
+  public:
+  Decorator(Coffee * decorated_coffee) {
+     coffee_ptr = decorated_coffee;
+  }
+
+  int getCost() {
+    return coffee_ptr->getCost();
+  }
+
+  void getIngredient() {
+    coffee_ptr->getIngredient();
+  }
+}
+
+// Derived classes from Decorator class
+
+class milk : public Decorator
+{
+  Coffee* coffee_ptr;
+  public:
+  milk(Coffee* decorated_coffee)  : Decorator(decorated_coffee) {
+    coffee_ptr = decorated_coffe;
+  }
+
+  int getCost() {
+    return coffe_ptr->getCost() + 1;
+  }
+
+  void getIngredient() {
+    coffe_ptr->getIngredient();
+    cout<< "Additional milk"<<endl;
+  }
+}
+
+class malai : public Decorator
+{
+  Coffee* coffe_ptr;
+  public:
+  malai(Coffee* decorated_coffee) : Decorator(decorated_coffee) {
+    coffee_ptr = decorate_coffe;
+  }
+
+  int getCost() {
+    return coffe_ptr->getCost() + 1;
+  }
+
+  void getIngredient() {
+    coffe_ptr->getIngredient();
+    cout<< "Additional malai"<<endl;
+  }
+}
+
+Coffee* cf = new SampleCoffee();
+cout<<cf->getCost()<<endl;
+COffe* milk_cf = new milk(cf);
+Coffee* malai = new malai(milk_cf);
+
+Note: Inheritance - compile time binding
+       Decorator - Runtime binding, as you wish
+
+/******************** Observer Design Pattern *************************/
+
+It is used for group notification. It is behavarial pattern.
+
+class Observer    // Interface
+{
+   public:
+  virtual void notify() = 0;
+}
+
+class Observable
+{
+  static observable* ob;
+  set<Observer*> ob_list;
+  Observable() { };
+  Observable(Observable &obj) { };
+  
+  public:
+  static Observable* CreateObservable() {
+    if(ob == NULL) {
+      ob = new Observable();
+    }
+    return ob;
+  } 
+  void Add(Observer *ob);
+  void Delete(Observer *ob);
+  void Notify();
+  void Trigger();
+};
+Observable* Observable::ob = NULL;
+
+void Observable::Add(Observer *ob) {
+   ob_list.insert(*ob);
+}
+
+void Observable::Delete(Observer *ob) {
+   ob_list.erase(*ob);
+}
+
+void Observable::Notify() {
+  set<Observer*>::iterator it = ob_list.begin();
+  for(; it != ob_list.end(); it++) {
+    (*it)->notify();
+  }
+}
+
+void Observable::Trigger() {
+  Notify();
+}
+
+class Observer1 : public Observer
+{
+  Observable* ref;
+  public:
+  Observer1() {
+    ref = Observable::Create_Observable();
+    ref->Add(*this);
+  }
+  ~Observer() {
+    ref->delete(*this);
+  }   
+}
+
+stl::erase (val)  // erases value from stl
+stl::erase(itr)  // erases value directed by itr
+stl::erase(itr1, itr2) // erases elements from itr1 to itr2, equality at both ends
+
+/********************* Design Principles ************************/
+Dependency Inversion etc....
+
+/********** Composition *******************
+
+class A 
+{
+};
+
+class B
+{
+  A *obj;
+  public:
+  B() {
+    obj = new A();
+  }
+};
+
+B* b_obj = new B(); // class A obj is also created inside
+delete b_obj;  // A obj is destroyed
+if car is destroyed, engine is also destroyed
+
+/***************** Association ******************/
+
+class A
+{
+}
+
+class B
+{
+  A *obj;
+  B(A *a_obj){
+    obj = a_obj;
+  }
+};
+
+A* a_obj = new A();
+B* b_obj = new B(a_obj);
+delete b_obj;  // a_obj is still alive;
+
+// If building is destroyed, address remains alive
+
+/*****************CLONING ******************************/
+
+class A
+{
+  int a;
+  public:
+  A(int val) : a(val) { }
+  A* clone() {
+    return (new A(*this));
+  }
+}
+
+/*********************** MY NOTES (COPY OF ALL NOTES) ***************/
+
+/****************** Operator Overloading *****************************/
+
+S1 – S2 = S1.operator-(S2);
+S3 = S1 – S2;
+S3 = S1.operator-(S2);
+
+List of operators that can't be overloaded: sizeof, . , ?:, ::, typeid
+
+Unary operator overloading:
+Operator++()  //prefix
+{
+   X++;
+}
+
+Operator++(int) //postfix
+{
+   X++;
+}
+
+Note: ++obj = obj.operator++();
+      Obj++ = obj.operator++(0);
+
+Overloading binary operator:
+A  A::operator+(A &obj)
+{
+  return A(x + obj.x);
+}
+
+Overloaded operator can also be overloaded:
+A A::operator+(A &obj);
+A A::operator+(int x);
+
+Obj2 = obj1 + 20;  // valid
+Obj2 = 20 + obj1; // invalid (It can be achieved by friend operator overloading
+
+Friend overloaded operator takes one extra argument
+A A::Operator + (A &0bj1, A &obj2);
+A A::operator+(int x, A &obj);   // obj2 = 20 + obj1;
+
+Note: fundamental data type conversion is taken care by compiler.
+Class X
+{
+   int a;
+   X(int b):a(b) {};
+}
+
+X obj = 12; // correct
+
+Class X
+{
+   int a;
+   Operator int(){
+   };
+}
+X obj(2);
+Int x = (int)obj; // correct
+
+Overloaded assignment operator allows chain assignment
+a = b = c;
+
+Overloading assignment operator:
+CString::operator=(const CString &rhs)
+{
+    If(this == &rhs)
+      return *this;
+    delete [] m_pstring // clean up
+    m_pstring = new char[rhs.GetLength()+1];
+    strcpy(m_pstring, rhs.pString); 
+    return *this;
+}
+
+Overload new/delete operator:
+
+void * operator new(size_t size) 
+{ 
+   cout<< "Overloading new operator with size: " << size << endl; 
+   void * p = ::new student();  // calling standard namespace new
+   //void * p = malloc(size); will also work fine 
+      
+   return p; 
+} 
+  
+void operator delete(void * p) 
+{ 
+   cout<< "Overloading delete operator " << endl; 
+   free(p); // used only if allocated by malloc/calloc
+}
+
+/********************* Templates *******************************/
+
+A generic function defines a general set of operation that will be applied to various types of data.
+Template Instantiation: During compile time, compiler creates different object of functions as per data type 
+                        provided for specified template function call.
+Templates reduces code size and increase code flexibility.
+template<class X> swap(X &a, X &b)
+{
+   …..
+}
+
+Swap<int, int>(10,20);
+Swap<double, double>(10, 10);
+
+Here two swap function object is created.
+
+int a = 10;
+int b = 20;
+Swap(a, b);  // Here also swap<int, int> is called.
+template<class X> swap(X &a, X&b = 12)  // Invalid , default value is not allowed with template type parameter.
+template function can be overloaded with non template function.
+Void func( int a, int b);
+template<class X> func(X a, X b);
+int  a = 10;
+int b = 20;
+Func(a, b);  // calls explicit func
+Func<int, int>(a, b)  // calls template function.
+
+Template function can be overloaded by template function also.
+Template<class X> func(X a)
+Template <clas X, class Y> func(X a, X b);
+
+TEMPLATE CLASS:
+template<class type>
+class base
+{
+}
+
+base<int> obj;
+
+template<class type>
+class base
+{
+}
+template<class type>
+class derived: public base<type>
+{
+}
+
+derived<int> obj;
+template <class type>
+class base
+{
+}
+
+class derived: public base<int>
+{
+}
+
+derived obj;
+
+class base
+{
+}
+
+template<class type>
+class derived: public base
+{
+}
+
+derived<int>obj;
+
+/************************** RTTI (real Time Type Identification) *****************/
+	 
+class A
+{
+   int a;
+};
+
+class B : public A
+{
+  int b;
+}
+
+Note: Here class A is not polymorphic, no virtual function.
+
+A *obj1 = new A();
+A *obj2 = new B();
+B *obj3 = new B();
+
+typeid(obj1).name()  -> PA
+typeid(obj2).name() -> PA
+typeid(obj3).name()-> PB
+
+typeid(*obj1).name()  -> A
+typeid(*obj2).name() -> A
+typeid(*obj3).name()-> B
+
+B* obj4 = dynamic_cast<B*>(obj2)   -> Not possible because, base calss is not polymorphic.
+
+Note: static_cast is possible.
+	
+Class A
+{
+   int a;
+   public: 
+   virtual void print() {
+      cout << “print”<<endl; 
+   }
+};
+
+class B : public A
+{
+  int b;
+}
+
+Note: Here class A is not polymorphic, no virtual function.
+
+A *obj1 = new A();
+A *obj2 = new B();
+B *obj3 = new B();
+
+typeid(obj1).name()  -> PA
+typeid(obj2).name() -> PA
+typeid(obj3).name()-> PB
+
+typeid(*obj1).name()  -> A
+typeid(*obj2).name() -> B   // see difference here compared to example 1.
+typeid(*obj3).name()-> B
+
+B* obj4 = dynamic_cast<B*>(obj2)   -> possible because, base calss is  polymorphic.
+B* obj5 = static_cast<B*> (obj1)-> possible;
+B* obj5 = dynamic_cast<B*> (obj1)-> not possible;
+
+
+Note: static_cast is possible.
+
+
+/********************* FRIEND FUNCTION *********************************/
+
+
+/******************** Smart Pointers ************************************/
+
+
+/******************* Miscellaneous ***************************************/
+> string class always uses copy on write.
+> const method and non const method can have same signature and will be overloaded in class. (Same is not
+  applied with static). A static and non static member function cant have same names.
+> The const qualifier on a member function means that you cannot modify non-mutable non-static class member 
+  variables. 
+> this pointer in a const member function is const and this is inherently related to an instance of a class. 
+  static members are not related to a class instance. so, const member function can modify a static member by 
+  writing A::a = 10;
+> data member can be declared mutable so that const class can modify that.
+> By definition, const class cant modify own non-mutable, non-static data member but it can modify other class 
+  object data members.
+> static function doesn't have this pointer.
+
+/********************** SCIENTIFIC GAMES IMPORTANT NOTES ****************/
+
+#ifndef _Game_Utilities_H_
+##define _Game_Utilities_H_
+
+##include<iostream>
+##include<string.h>
+##include<vector>
+##include<map>
+
+namespace GameUtilities
+{
+  template<typename T>
+  void DeleteSpriteVector(std::vector<T> &vect)
+  {
+    typename std::vector<T>::iterator it;    // vvi (not knowing whether it's static field or type because of T)
+                                             // line parsing will throw error this way
+                                             // so typename indicates, it's a type 
+    for(it = vect.begin(); it != vect.end(); it++)
+    {   
+      FREEANDNIL(*it);
+    }   
+    vect.clear();
+  }
+
+  // This utility useful to find size of an struct array or any data type, no need of - sizeof(arr)/sizeof(arr[0])
+
+  template<class T, std::size_t N>
+  std::size_t size(T (&)[N])
+  {
+    return N;
+  }
+};
+
+#endif
+
+/************** Shuffler ****************************/
+
+class Shuffler
+{
+  protected:
+
+  public:
+  // Construct/Destruct
+  Shuffler();
+  ~Shuffler();
+  
+  // Methods
+  void Shuffle(int* &_intArray, int _Size);
+  void Shuffle(ulong _Seed, int* _intArray, int _Size);
+  void Shuffle(vector<int> &_ShuffleMe);
+  void Shuffle(ulong _Seed, vector<int> &_ShuffleMe);
+
+  // Variables
+  ulong Seed;
+  vector<int> ShuffleMe;
+};
+
+Shuffler::Shuffler()
+{
+}
+
+Shuffler::~Shuffler()    
+{
+}
+
+// ============================================================================
+// Method for shuffling an array of integers without needing to replicate
+// ----------------------------------------------------------------------------
+void Shuffler::Shuffle(int* &_intArray, int _Size)
+{
+  vector<int> ShuffleMe;
+  for(int i = 0; i < _Size; i++)
+  {
+    ShuffleMe.push_back(_intArray[i]);
+  }
+  random_shuffle(ShuffleMe.begin(),ShuffleMe.end());
+  for(int i = 0; i < _Size; i++)
+  {
+    _intArray[i] = ShuffleMe.at(i);
+  }
+}
+
+// ============================================================================
+// Method for shuffling an array of integers with the need to replicate
+// ----------------------------------------------------------------------------
+void Shuffler::Shuffle(ulong _Seed, int* _intArray, int _Size)
+{
+  // Initialize and seed our SeqGen
+  SequenceGenerator SG(_Seed);
+
+  int temp = 0;
+  int index = 0;
+  for(int i = 0; i < _Size; i++)
+  {
+    index = (int)(SG.GetNext(_Size - i) + i);
+    temp = _intArray[i];
+    _intArray[i] = _intArray[index];
+    _intArray[index] = temp;
+  }
+}
+
+// ============================================================================
+// Method for shuffling vector<int> without needing to replicate
+// ----------------------------------------------------------------------------
+void Shuffler::Shuffle(vector<int> &_ShuffleMe)
+{
+  random_shuffle(_ShuffleMe.begin(),_ShuffleMe.end());
+}
+
+// ============================================================================
+// Method for shuffling vector<int> with the need to replicate
+// ----------------------------------------------------------------------------
+void Shuffler::Shuffle(ulong _Seed, vector<int> &_ShuffleMe)
+{
+  // Initialize and seed our SeqGen
+  SequenceGenerator SG(_Seed);
+
+  int temp = 0;
+  int index = 0;
+  for(uint i = 0; i < _ShuffleMe.size(); i++)
+  {
+    index = (int)(SG.GetNext(_ShuffleMe.size() - i) + i);
+    temp = _ShuffleMe.at(i);
+    _ShuffleMe.at(i) = _ShuffleMe.at(index);
+    _ShuffleMe.at(index) = temp;
+  }
+}
+
+/************ How to implement a class so that it could not be derived(inheritted) ****************/
+
+Note: In C#, this kind of class is already implemented internally, named as shield class.
+      In C++, make destructor private then deriving this class wont be possible. Derived class needs the
+      base class destructor as private because destructor is called bottom to top.
+      Constructor is called top to bottom. First base class is constructed then derived class.
+
+Exception: If we assign a derived class object to  base class pointer or reference and we forget to declare
+      base class destructor as virtual then in this case destruction wont happen bottom to top. In fact, 
+      derived class destructor is not at all called, only base class destructor is called.
+
+/*************** What is object slicing ********************************************/
+
+In C++, if derived class object is not assigned to base class as pointer then default/user customized 
+overloaded assignment operator is called and derived class object is not fully cloned so, it gets sliced.
+Same can happen in case of copy constructor.
+
+    Derived d; 
+    Base b = d;  // Object is sliced
+    Base b(d);   // Object is sliced
+
+    vector<Base> v;
+    Derived d;
+    v.push_back(d);  // Object is sliced
+
+/***** Virtual constructor or Virtual copy constructor ? *********************/
+
+No, Virtual copy constructors are not possible because the virtual keyword in context of
+base class methods being overridden by implementations available in the derived class
+are about polymorphic behavior generated at runtime. Constructors, on the other hand,
+are not polymorphic in nature as they can construct only a fixed type, and hence C++
+does not allow usage of the virtual copy constructors.
+
+/****** c++(11): override and final keyword ************************/
+
+class A
+{
+  public:
+  virtual void doit() 
+  {
+  }
+};
+
+class B: public A
+{
+  public:
+  void doit() const
+  {
+  }
+}
+
+Note: In above case, compilation succeeds but it is not overridden, developer will be underimpression that it
+is overridden. c++11 has introduced a keyword - 'overrride' which checks at compile time whether overriding is
+successful or not.
+
+class B: public A
+{
+  public:
+  void doit() const override   // c++11 or above compiler will throw error here
+  {
+  } 
+}
+
+final keyword: A function can be prevented from overrriding by derived class and a class can be prevented from 
+deriving by using final keyword.
+
+class A final   // destructor is made virtual
+{
+  public:
+  virtual void doit() override final //function is made private
+  {
+  }
+}
+
+class X final : public Y
+{
+}
+
+/*************** What is diamond problem ? ***************************/
+class A
+{
+  public:
+  int a;
+}
+
+class B derives class A.
+class C derives class A
+class D derives class A
+class E : public D, public C, public D
+{
+}
+
+int main() 
+{
+  class E obj;  // compiles till here, three time class A constructor is called, class E has three copy of A
+  obj.a = 20;   // compilation prob, ambiguity which copy should be modified
+}
+
+This is called diamond problem, virtual keyword is solution of this problem.
+
+class B: public virtual A
+class C: public virtual A
+class D: public virtual A
+class E: public D, public C, public D
+{
+  // It's fine. it will have only copy of class A
+}
+
+/***************** Important *************************************************/
+
+1. Do remember to mark base class functions that need to be overridden by the derived class as virtual.
+2. DO remember that pure virtual functions make your class an Abstract Base Class, and these functions 
+   must be implemented by a deriving class.
+3. Do mark functions in derived classes that are intended to override base functionality using keyword
+   override(C++11 or above).
+4. DO use virtual inheritance to solve the Diamond Problem.
+5. DON’T forget to supply your base class with a virtual destructor.
+6. DON’T forget that the compiler does not allow you to create a standalone instance of an Abstract Base Class.
+7. DON’T forget that virtual inheritance is about ensuring that the common base in a diamond hierarchy has 
+   only one instance.
+8. DON’T confuse the function of keyword virtual when used in creating an inheritance hierarchy with the same 
+   when used in declaring base class functrion.
+
+/******************* Write a program to write code of load balancer **************************/
+
+Load balancer is very good example of hashing mechanism, As we know load balancer is software or hardware or
+combination of software and hardware.
+Load balancer software works on hashing mechanism. It is used when more than one server is present in system
+as horizontal scaling to handle and route multiple requests to diffrent servers for making the system resilient.
+
+Please check the system design notes - Hashing and consisten hashing mechanism.
+
+For hashing, we can use unordered_set or unordered_map efficiently as it uses hashing mechanism internally.
+
+
+/******** pass 1-D and 2-D array by reference in C++ ****************************/
+
+1-D Array:
+=========
+
+int func(int (&arr)[5]) {
+}
+
+int arr[5] = { 1, 2, 3, 4, 5};
+func(arr);
+
+Same can be handled by template, here size of array is captured at compile time:
+
+template<typename T, size_t N>
+int func(T (&arr)[N]) {
+  cout<< "size is: "<<N<<endl;
+}
+
+2-D Array:
+=========
+
+int func(int (&arr)[2][2]) {
+}
+
+int arr[2][2] = { {1, 2}, 
+               {3, 4} };
+func(arr);
+
+Same can be handled by template, here size of array is captured at compile time:
+
+template<typename T, size_t M, size_t N>
+int func(T (&arr)[M][N]) {
+  cout<< "row is: "<<M<<" col is: "<<N<<endl;
+}
+
+/***************** delete operator ******************************************/
+
+Note: deleting null pointer and void pointer don't cause any problem.
+int* p = null;
+delete p;  // fine, no issue
+
+void *q;
+delete q;  // fine, no issue
+
+/************** Calling method on null pointer in c++ **************************/
+
+Calling a method on null pointer without initializing with any object is ok untill we use this pointer in the
+called method.
+
+class A
+{
+  int a;
+  public:
+  void method() {
+    cout<< "nikhil"<<endl;
+    cout<<a<<endl;  // problem
+  }
+}
+
+A* ptr = NULL;
+ptr->method();  // no prob
+
+/************* How to check for a char* argument in a function ****************************/
+
+void func(char* str) {
+  if((str == NULL) || str[0] == '\0') {
+    return;
+  }
+}
+
+We need to check both the condition but in proper order, if str is not null then only we need to check if str
+length is zero. If any condition of the two is missing then code is not proper and prone to crash.
+
+we can replace the above condition as below:
+if(str == NULL) || strlen(str) == 0) {
+   return;
+}
+
+/*********** What are the operators which can't be overloaded? **************************/
+
+.
+.*
+::
+:?
+sizeof
+
+/********************** fnmatch in c/c++ (for pattern matching) ************************/
+
+fnmatch is very powerful API for pattern matching in c/c++. It is similar to regex for pattern matching.
+It is defined in <fnmatch.h>.  [Got an example in temperature thread]
+If pattern matches, it returns 0.
+
+#include<fnmatch.h>
+
+int main()
+{
+
+  //char *pattern = "status.eye*.id";
+  char *pattern = "status.eye[abc]-[def]*.id";
+  //char *string = "status.eye12.id";
+  char *string = "status.eyeb-fnikhil.id";
+
+  if(!fnmatch(pattern, string, 0)) {
+    printf("Pattern is matching\n");
+  } else {
+    printf("Pattern didn't match\n");
+  }
+
+  return 0;
+}
+
+/******************* Static Object Destruction *******************************/
+
+Static object destructors
+Destructor for static objects are called when main() exits or when the standard C library function exit() is explicitly called.
+
+/*********** Is it possible to have Virtual Constructor? If yes, how? If not, Why not possible? **************/
+
+There is nothing like Virtual Constructor. The Constructor can’t be virtual as the constructor is a code which is responsible for creating an instance of a class and it can’t be delegated to any other object by virtual keyword means.
+
+/** Can a copy constructor accept an object of the same class as parameter, instead of reference of the object?
+
+No. It is specified in the definition of the copy constructor itself. It should generate an error if 
+a programmer specifies a copy constructor with a first argument that is an object and not a 
+reference
+
+/*************** What is conversion operator? **********************************/
+
+class can have a public method for specific data type conversions. 
+for example: 
+class Boo 
+{ 
+  double value; 
+  public: 
+  Boo(int i ) 
+  operator double() 
+  { 
+    return value; 
+  } 
+}; 
+Boo BooObject; 
+double i = BooObject; // assigning object to variable i of type double. 
+now conversion operator gets called to assign the value.
+
+/******************** What is "placement new" and why would I use it?. **************************/
+
+There are many uses of placement new. The simplest use is to place an object at a particular location in memory. This is done by supplying the place as a pointer parameter to the new part of 
+a new expression. 
+
+#include // Must #include this to use "placement new" 
+#include "Fred.h" // Declaration of class Fred 
+void someCode() 
+{ 
+char memory[sizeof(Fred)]; // Line #1 
+void* place = memory; // Line #2 
+Fred* f = new(place) Fred(); // Line #3 (see "DANGER" below) 
+// The pointers f and place will be equal 
+... 
+} 
+
+Line #1 creates an array of sizeof(Fred) bytes of memory, which is big enough to hold a Fred 
+object. 
+
+Line #2 creates a pointer place that points to the first byte of this memory (experienced C 
+programmers will note that this step was unnecessary; it's there only to make the code more 
+obvious). 
+
+Line #3 essentially just calls the constructor Fred::Fred(). The this pointer in the Fred 
+constructor will be equal to place. The returned pointer f will therefore be equal to place. 
+
+ADVICE: Don't use this "placement new" syntax unless you have to. Use it only when you really 
+care that an object is placed at a particular location in memory. For example, when your hardware has a memory-mapped I/O timer device, and you want to place a Clock object at that memory location 
+
+
+/*********** What will happen if I say "delete this" ********************************/
+
+if you say "delete this", you are effectively calling the destructor twice, which could well be a disaster if your class uses heap. The destructor will be called when you say " delete this " and again when that object goes out of scope. Since this is the language behavior, there is no way to prevent the destructor from being called twice.
+
+

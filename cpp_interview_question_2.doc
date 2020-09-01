@@ -1,0 +1,385 @@
+Qn: Why we need virtual destructor in c++?
+===========================================
+First base constructor is called then derived constructor is called.
+SImilaly, it should go in reverse order as first derived members should be deleted then base memebrs. Reason is:
+there could be case as derived object has a pointer which is defined by base class pointer during constructions so
+if first base will be destructed and later derived will be destructed then it can cause the crash.
+
+So derived class destruction happens and then base class destruction happens and we need virtua destructor to achieve
+this.
+
+Qn: When to use reference over pointers and vice versa?
+======================================================
+
+1. Use reference in function parameter and return type.
+   > while passing big objects.
+   > to avoid object slicing. ( this happens if we will not use reference or pointer )
+   > to modify local variables of caller function.
+   > to achieve run time polymorphism.
+
+2. Use pointers in data structure and algorithms as linked-list, tree, graph etc. Reason: sometimes we put null/nullptr which is not possible with reference.
+
+Qn: What is difference between for loop and range based for loop?
+=================================================================
+
+// range based for loop, we cant define the range. It runs from start to end.
+for(int i: vec) {
+   cout<<i<<endl;
+}
+
+// for each loop can be executed on specific range
+for_each(vec.begin(), vec.end(), [](int i) { cout<<i<<endl; })
+for_each(vec.begin()+1, vec.end()-2, [](int i) { cout<<i<<endl; })
+
+// range based for loop works on normal array but for_each doesn't work. for_each requires begin() and end()
+int a[3] = {1, 2, 3};
+for(int i: a) {
+  cout<<i<<endl;
+}
+
+Qn: What is name mangling ?
+==========================
+
+We can check how name mangles by compiler by using some commands.
+g++ -o -c nik.cpp
+nm nik.o
+
+Qn: What is override keyword in cpp?
+====================================
+
+If we write override keyword during function overriding in derived class. It confirms during compile time as this
+function is going to be overridden and if it misses any rule of overriding it throws error.
+Testing becomes easy in this case.
+Cmpile time check is performed in this case.
+
+void func() override {
+  cout<<"hello"<<endl;
+}
+
+Qn: What is the use of decltype in c++?
+======================================
+
+It is type deduction mechanism.
+
+template<typename T1, typename T2>
+T2 ad(T1a, T2 b)->decltype(a+b) {
+   return a+b;
+}
+
+add(1, 1.0);  // 2.0 without decltype
+add(1.0, 2);  // 2  without decltype
+
+Qn: What is auto keyword in c++?
+================================
+
+It is used for type deduction.
+auto x;  // not valid
+
+auto x = 20;
+auto y = 2.0;
+auto b = bew Base(20);
+
+cout<<typeid(x).name()<<endl;
+cout<<typeid(y).name()<<endl;
+cout<<typeid(b).name()<<endl;
+
+Qn: is it possible to call constructor and destructor by outside?
+=================================================================
+
+destrcutor can be called explicitly as:
+Base().~Base();   // calling destructor on temporary object, we can call on any object.
+
+// There is guarantee from c++, once object will go out of scope, destructor will be called.
+// Two times destructor will be called in the below case.
+Base obj;
+obj.~Base();
+// obj goes out of scope here.
+
+// We can call contructor also explicitily, it will create a temporary and call destructor at same time.
+Base(); // It will call conctructor and destructor at same time. For tempory object destructor is not called after
+        // going to out of scope. It gets called immediately after constructor.
+
+
+Qn: What is placement new in c++?
+=================================
+
+It is very good example of calling destructor explicitily.
+When e call new operator to construct the object. Kernel initializes the memory for object.
+Kernel switching is costly, memory fragmentation is also a problem so its good to ask one time all the memory instead
+of asking 10 times memory one by one from kernel.
+
+char* memory = new char[10*sizeof(Base)];  // memory pool
+Base* obj1 = new (&memory[0]) Base();
+Base* obj2 = new (&memory[2]) Base();
+Base* obj3 = new (&memory[4]) Base();
+
+obj1->~Base();
+obj2->~Base();
+obj3->~Base();
+
+delete[] memory;
+
+Qn: What is function hiding in c++?
+====================================
+
+class Base
+{
+   public:
+   void fun (int a) {
+     cout<<"base"<<endl;
+   }
+};
+
+class Derived : public Base
+{
+   public:
+   void fun(char c) {
+     cout<<"Derived"<<endl;
+   }
+};
+
+Derived d;
+d.fun('a'); // ok
+d.fun(2);  // not ok, function hiding happened
+d.Base::fun(2); // ok
+
+Qn: How to call function before main function?
+===============================================
+
+Method-1:
+
+void fun() { cout<<"hello"<<endl; }
+
+class Base {
+  public:
+  Base() {
+     fun();
+  }
+};
+
+Base b;
+
+Method-2:
+
+class Base()
+{
+  public:
+  static int var;
+};
+
+int fun() { return 2; }
+
+int Base::var = fun();
+
+Qn: How to stop someone from taking address of your object?
+============================================================
+
+Usually address opertor comes default overloaded in any class as below:
+Base* operator &() {
+   return this;
+}
+
+We can keep & operator in private section or delete it as below:
+Base* operator &() = delete;
+
+Qn: How to overload new and delete operator in c++?
+===================================================
+
+overloading new and delete operator gives developer more flexibility in heap allocation.
+There are two types of new and delete operator:
+1. local overloading (inside the class)
+2. Global overloading (outside of class)
+
+new and delete overloading are static function so they wont have this pointer. There is no need to write static 
+keyword for these two functions as it is a special case.Writing static is also ok.
+Dont forget to overload array version.
+
+We can have multiple new and delete overloaded function.
+
+void* operator new (size_t size)
+{
+   void* p = malloc(size);
+   return p;
+}
+
+void operator delete(void* p)
+{
+  free (p);
+}
+
+void* operator new[] (size_t size)
+{
+   void* p = malloc(size);
+   return p;
+}
+
+void operator delete[](void* p)
+{
+  free (p);
+}
+
+// we can have overloaded oerator with value
+void* operator new (size_t size, int val)
+{
+   void* p = malloc(size);
+   if(p != nullptr) {
+      *static_cast<int*> p = val;
+   }
+   return p;
+}
+
+int* x = new(0) int();
+
+Note: In c++, we dont have garbage collector but we can make garbage collection using overloaded new/delete opertor.
+      DUring allocation, we can keep some reference for allocated objects.
+
+Qn: What is function chaining in c++?
+=====================================
+
+Inside class Base:
+Base& set_a(int a) : _a(a) { return *this; } 
+Base& set_b(int b) : _b(b) { return *this; }
+void print() {
+   cout<<"_a is: "<<_a<<" _b is: "<<_b<<endl;
+}
+
+Base obj;
+obj.set_a(2).set_b(3).print();   // function chaining
+
+Qn: What is constructor delegation in c++?
+==========================================
+
+class Base
+{
+   int _x, _y;
+   public:
+    Base(): Base(0, 0) {}  // delegating default construction to two parameters constructor
+    Base(int a):Base(a, 0) {}  // delegating single parameter constructor to two parameter constructor
+    Base(int a, int b):_x(a), _y(b) {}
+
+Qn: const keyword behaviour with function overloading?
+=====================================================
+
+We can overload function with const and non-const keyword.
+const parameters allows to overload member function and normal function but it should be pointer or reference.
+
+// below code will give compilation error, we should use either reference or pointer
+void print(int x) {
+}
+
+void print(const int y) {
+}
+
+// below code is correct overloading
+void print(int *x) {
+}
+
+void print(const int* x) {
+}
+
+// example with object
+void print() {
+}
+
+void print() const {
+}
+
+Base obj1;        // it will call non-const function
+const Base pbj2; // it will call const function
+
+
+Qn: How delete knows how much to deallocate in c++?
+===================================================
+
+Over allocation:
+
+Base* bp = new Base(n);
+
+// char* tmp = (char*) operator new[] (WORDSIZE + n*sizeof(Base));
+// Base* p = (Base*) (tmp + WORDSIZE);
+// *(size_t *)tmp = n;   // stores how much is alocated
+// for(int i = 0; i < n; i++) {
+//   new (p+i) Base();
+// }
+// return p
+
+delete[]bp;
+
+// size_t n = * (size_t*) ((char*p) - WORDSIZE);
+// while(n-- != 0) {
+//   (p+n)->~base();
+// }
+// operator delete[] ((char*)p - WORDSIZE);
+
+
+Qn: How to make a class which can't be inheritted but object of that class can be created?
+=========================================================================================
+
+In the following code, we make the Final class non-inheritable. When a class Derived tries to inherit from it, we get compilation error.
+
+An extra class MakeFinal (whose default constructor is private) is used for our purpose. Constructor of Final can call private constructor of MakeFinal as Final is a friend of MakeFinal .
+
+Note that MakeFinal is also a virtual base class. The reason for this is to call the constructor of MakeFinal through the constructor of Derived, not Final (The constructor of a virtual base class is not called by the class that inherits from it, instead the constructor is called by the constructor of the concrete class).
+
+#include<iostream> 
+using namespace std; 
+  
+class Final; 
+  
+class MakeFinal 
+{ 
+private: 
+    MakeFinal() { cout << "MakeFinal constructor" << endl; } 
+    friend class Final; 
+}; 
+  
+class Final : virtual MakeFinal 
+{ 
+public: 
+    Final() { cout << "Final constructor" << endl; } 
+}; 
+  
+int main(int argc, char *argv[]) 
+{ 
+    Final f; 
+    return 0; 
+} 
+
+============================================================================
+Qn: How to make a C++ class whose objects can only be dynamically allocated?
+============================================================================
+
+The idea is to create a private destructor in the class. When we make a private destructor, the compiler would generate a compiler error for non-dynamically allocated objects because compiler need to remove them from stack segment once they are not in use.
+
+Note: dynamically object can be created because compiler doesn't have responsibility to delete the object. But we need a friend function which is used to call delete on dynamic object bcause we cant call delete from outside as destructor is private.
+
+      
+class Test 
+{ 
+private: 
+    ~Test() { cout << "Destroying Object\n"; } 
+public: 
+     Test() { cout << "Object Created\n"; } 
+     friend void destructTest(Test* ); 
+}; 
+  
+// Only this function can destruct objects of Test 
+void destructTest(Test* ptr) 
+{ 
+    delete ptr; 
+    cout << "Object Destroyed\n"; 
+} 
+  
+int main() 
+{ 
+    /* Uncommenting following following line would cause compiler error */
+    // Test t1; 
+  
+    // create an object 
+    Test *ptr = new Test; 
+  
+    // destruct the object to avoid memory leak 
+    destructTest(ptr); 
+  
+    return 0; 
+} 
