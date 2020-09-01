@@ -1,0 +1,715 @@
+/************************** Algorithms ******************************************/
+1. std::sort
+
+   It sorts integers in ascending order and strings in lexicographical order default.
+   lexicographical order - dictionary order.
+   
+   Most implementation of std::sort are using a sort called - introsort, which is hybrid of quicksort + heapsort
+
+   vector<int> v = { 3, 20, 5 };
+   sort(v.begin(), v.end());    // 3, 5, 20
+   sort(v.begin(), v.end(), greater<int>());  // 20, 5, 3
+
+   vector<string> v = { "mouse", "dog", "cat", "ant", "moth", "elephant" };
+   sort(v.begin(), v.end() );  // "ant", "cat", "dog", "elephant", "moth", "mouse"
+  
+   // c++11
+   auto sortByLength = [] (const auto& a, const auto& b) { return a.size() < b.size(); };   // lambda function
+   sort(v.begin(), v.end(), sortByLength);  // "ant", "cat", "dog", "moth", "mouse", "elephant"
+                                            // here order of same length word can change
+
+   stable_sort(v.begin(), v.end(), sortByLength);  // Order of same length word will be same always
+
+2. std::binary_search
+
+   It is typical binary search algorithm, works only on sorted array. TIme complexity - O(logN)
+  
+   vector<int> v = { 1, 3 ,5; 7 };   // sorted
+   cout<< (binary_search(v.begin(), v.end(), 3) ? "found" : "not found") << endl;   // found
+   cout<< (binary_search(v.begin(), v.end(), 4) ? "found" : "not found") << endl;   // not found
+
+3. std::lower_bound
+
+   This is an algorithm for logarithmis time - O(logN). Used on sorted array.
+   It returns an iterator to the first element equal to or greater than a given value in sorted sequence. // Imp
+
+   vector<int> v = { 2, 4, 4, 5, 6 };
+   lower_bound(v.start(), v.end(), 4 );  // iterator to 1st index element (4)
+   lower_bound(v.start(), v.end(), 3 );  // iterator to 1st index element (4)
+ 
+4. std::upper_bound
+
+   This is an algoritm with logarithmic time - O(logN), used on sorted array.
+   It returns an iterator to the first element greater than a given value in a sorted sequence.  // Imp 
+
+   vector<int> v = { 2, 4, 4, 5, 6 };
+   upper_bound(v.start(), v.end(), 4 );  // iterator to 3rd index element (5)
+   upper_bound(v.start(), v.end(), 3 );  // iterator to 1st index element (4)
+   upper_bound(v.start(), v.end(), 6 );  // iterator to v.end()
+
+5. std::count
+
+   This is an algorithm with linear time complexity - O[N], that returns the number os elements in the range
+   [ first, lst] that compares equal to val.
+
+   vector<int> v = { 1, 2, 3, 1, 2 };
+   cout << count (v.begin(), v.end(), 1) << endl;  // 2
+   cout << count (v.begin(), v.end(), 3) << endl;  // 1
+
+6. std::count_if
+  
+   This is an algorithm with linear time complexity - O[N], that returns the number os elements in the range
+   [ first, last] for which predicate is true.
+
+   vector<int> v = { 1, 2, 3, 1, 2 };
+
+   // Using function pointer
+
+   bool is_odd(const int &a) {
+      return (a % 2 == 1);
+   }
+   cout << count_if (v.begin(), v.end(), is_odd) << endl;  // 3
+
+   // Using functor
+
+   class is_odd 
+   {
+     public:
+     bool operator() (int a) {
+       return a %2 == 1;
+     }
+   }
+   cout << count_if (v.begin(), v.end(), is_odd()) << endl;  // 3
+
+   // using lambda functio
+
+   auto is_odd = [] (auto e) { return e %2 == 1; };
+   cout << count_if (v.begin(), v.end(), is_odd) << endl;  // 3
+   cout << count_if (v.begin(), v.end(), [] (auto e) { return e %2 == 1; }) << endl;  // 3
+
+Question: Create a functor to count a vector elements greater than 5
+
+   vector<int> v = { 1 , 5, 6, 20, 8, 3 };
+
+   class Greater
+   {
+      int num;
+      public:
+      Greater(int a) : num(a);
+      bool Operator() ( int a) {
+         return a > num;
+      }
+    }
+
+   count_if(v.begin(), v.end(), Greater(5));  // 3
+  
+7. std::min
+
+   Returns smallest of a and b. If both are equivalent, a is returned.
+
+   auto i = { 1, 2, 3 };
+   cout<< "Min is "<<min(i) << endl;
+   cout<< "Min is "<<max(i) << endl;
+
+8. std::minmax
+
+   Returns a pair with smallest of a and b as first element, and largest as second. If both are equivalent, the
+   function returns make_pair(a,b);
+
+   int a = 2;
+   int b = 1;
+   pair<int, int> p =minmax(a, b);
+   cout << "min is "<<p.first<<endl;
+   cout << "max is "<<p.second<<endl;
+
+9. std::min_element
+
+   Returns an iterator pointing to the element with the smallest value in the range [first, last]
+
+10. std::max_element
+ 
+   returns a pair with an iterator pointing to the element with the smallest value in the range [first, last],
+   as first element , and the lasrgest as second.
+   // for vector of int
+   int maxVal = *max_element(vct.begin(), vct.end());
+   // array of int
+   int maxVal = *max_element(arr, arr+n);
+   int maxVal = *max_element(arr, arr+3);
+
+11. std::vector
+
+    Most common methods/operators:
+    reserve()        // O(1), reserves memory for specified number of elements.
+    push_back()      // O(1), if capacity > size, if capacity is doubled then it copied again so, O(N)
+    []               // bracket operator, O(1)
+    size()           // O(1)
+    capacity()       // O(1)
+    erase(iterator)  // O(N), it erases the element and then shifts rest elements by 1
+
+    vector<int> v;                  // v = { }
+    cout << v.size() << endl;       // 0
+    cout << v.capacity() << endl;   // something
+    v.push_back(20);                // v = { 20 }
+    v.push_back(10);                // v = {20, 10}
+    v.push_back(10);                // v = {20, 10, 10}
+    cout << v[1] << endl;           // 10
+    cout << v.size() << endl;       // 3
+
+12. std::set 
+   
+     Stores elements in sorted order internally,  strings are lexographically sorted.
+     Uses self balanced BST to store elements. Duplicates are not allowed. Default sort is ascending order.
+
+     Most common methods:
+     insert(val)         // O(logN)
+     find(val)           // O(logN), returns iterator to val
+     size()              // O(logN)
+     erase()             // O(logN)
+     clear()             // O(N), similar to clear a tree
+     empty()             // O(1)
+     lower_bound(val)    // O(logN), returns iterator to the first element of equal or greater val
+     upper_bound(val)    // O(logN), returns iterator to the first element greater to the given val
+     equal_range(val)    // O(logN), returns pair<iterator, iterator> of first and last of val range  
+
+     set<int> s;                 // s = { }
+     cout<<s.size() << endl;     // 0
+     s.insert(20);               // s = {20}
+     s.insert(10);               // s = {10, 20}
+     s.insert(10);               // s = {10, 20}
+
+     set<int>::iterator it = s.find(10);    // it is iterator that points to 10
+     auto it = s.find(10);                  // it is iterator that points to 10
+     cout<<(it != s.end() ? "found" : "not found" <<endl;
+     cout<< s.size();                       // 2
+    
+13. std::unordered_set
+
+    It stores elements internally with help of hashing mechanism in any order.
+    Duplicates are not allowed here. 
+
+    Most common methods:
+    insert()      // O(1)
+    find()        // O(1)
+    size()        // O(1)
+
+14. std::map
+
+    It is similar to set but stores a key-value pairs. Default sorted in ascending orderi by keys.
+    Internally implemented as self balancing BST. (AVL or Red-Black tree).
+    Duplicate keys are not allowed.
+
+    Most common methods:
+    insert()            // O(logN),  insert using make_pair
+    []                  // O(logN),  returns ref to value
+    size()              // O(1)
+    find(val)           // O(logN), returns iterator to val
+    erase()             // O(logN)
+    clear()             // O(N), similar to clear a tree
+    empty()             // O(1)
+    lower_bound(val)    // O(logN), returns iterator to the first element of equal or greater val
+    upper_bound(val)    // O(logN), returns iterator to the first element greater to the given val  
+    equal_range(val)    // O(logN), returns pair<iterator, iterator> of first and last of val range
+
+   map<int, int> m;                   // m = { }
+   cout<<m.size()<<endl;              // 0
+   m.insert(make_pair(20,1));         // m = {(20,1)}
+   m.insert(make_pair(10,1));         // m = {(10,1), (20,1)}
+   m[10]++;                           // m = {(10,2), (20,1)}
+   
+   map<int, int>::iterator it = m.find(10);            // iterator that points to (10, 2)
+   auto it = m.find(10);
+   cout<<(it != m.end())? it->second : 0 << endl;      // 2
+ 
+15. std::unordered_map
+
+    It is similar to unordered_set but stores a key-value pairs. Default sorted in ascending orderi by keys.
+    Internally implemented by hashing mechanism.
+    Duplicate keys are not allowed. It takes care of hash collision internally beautifully.
+
+    Most common methods:
+    insert()             // O(1), insert using make_pair
+    find                 // O(1), return pair
+    []                   // O(1), bracket operator, returns ref to the value
+    size()               // O(1)      
+
+/***************** Containers Adapters ************************************/
+
+Note: stack, queue and priority_que are called adapters.
+      stack and queue are implemented internally with help of deque
+      priority_queue is implemented internally with help of vector
+      That is why these are called adapters because these STLs are implemented with help of other STL.
+
+16. std::stack (LIFO, FILO)
+
+    Implemented internally with help of deque.
+    Most common methods:
+    push()         // O(1)
+    pop()          // O(1)
+    top()          // O(1)
+    size()         // O(1)
+
+    stack<int> s;
+    cout << s.size() < <endl;         // 0
+    s.push(1);
+    s.push(2);      
+    cout<<s.top() << endl;            // 2
+    s.pop();
+    cout<<s.top() << endl;            // 1
+    cout<<s.size() << endl;           // 1
+
+17. std::queue (FIFO)
+
+    Internally implemented with help of deque.
+
+    Most common methods:
+    push()            // O(1)
+    pop()             // O(1)
+    front()           // O(1)
+    size()            // O(1)
+
+    queue<int> q;
+    cout << q.size() << endl;                 // 0
+    q.push(1);
+    q.push(2);
+    cout<<q.front() << endl;                  // 1
+    q.pop()
+    cout<< q.front() << endl;                 // 2
+    cout<< q.size() << endl;                  // 1
+
+18. std::priority_que 
+    
+     It is implemented internally as heap data struture with help of vector.
+
+     Most common methods:
+     push()       // O(logN),  1 call to push_back, 1 call to push_heap
+     pop()        // O(logN),  1 call to pop_heap, 1 call to pop_back
+     top()        // O(1)
+     size()       // O(1)
+
+     priority_que<int> pq;           // default max heap
+     cout<<pq.size() << endl;
+
+     pq.push(3);
+     pq.push(1);
+     pq.push(2);
+
+     cout<<pq.top() << endl;         // 3
+     pq.pop();
+     cout<<pq.top()<<endl;           // 2
+     cout<<pq.size()<<endl;          // 2
+
+     Note: min_heap can be declared as below:
+           priority_queue <int, vector<int>, greater<int> > pq;
+           We can use our own comparator depending on the data-structure of storing elements.
+
+19. std::multiset
+   
+    It is similar to set, only difference id duplicate elements are allowed here.
+    It is internally self balanced BST [AVL or red black]. Stores elements in sorted order.
+    Default sorting order is ascending order.
+
+    methods are same as set.
+
+20. std::multimap
+
+    It is similar to map, only difference id duplicate keys are allowed here.
+    It stores key-val pair.
+    It is internally self balanced BST [AVL or red black]. Stores elements in sorted order by key.
+    Default sorting order is ascending order.
+
+    methods are same as map.
+
+/******************************** VECTOR ***************************************/
+
+Vector is a template based container that behaves just like a Dynamic Array.
+std::vector allocates a memory on heap and store all its elements in contiguous memory location.
+It can expands its memory at run time and always store elements in contiguous memory location just like Array.
+We can store any type of element in vector by specifying the type as template argument.
+Vector-Size >= Vector-Capacity
+Vector capacity is always doubled, when it needs to grow dynamically.
+
+Random access is very fast with O(1) by overloaded operator [].
+Insertion, deletion at end is fast - O(1).
+Insertion, deletion at middle is slow as after deletion it needs to rearrange. O(2N) ~ O(N).
+
+It always stores copy of the object not the same reference. So, if you are adding objects of user defined 
+classes then you should define copy constructor and assignment opeartor in your class else default will be called.
+
+Insert an element in vector at specific position:
+------------------------------------------------
+std::vector<int> vecOfNums { 1, 4, 5, 22, 33, 2, 11, 89, 49 };
+auto itPos = vecOfNums.begin() + 4;
+auto newIt = vecOfNums.insert(itPos, 9)  // 1 , 4 , 5 , 22 , 9 , 33 , 2 , 11 , 89 , 49
+
+Suppose vector initial capacity is of 10 element and we insert 11 elements then what will happen?
+------------------------------------------------------------------------------------------------
+1.) It will allocate a bigger chunk of memory on heap i.e. almost double the size of previously allocated.
+2.) Then it copies all the elements from old memory location to new one. Yes it copies them, so in case our 
+    elements are user defined objects then their copy constructor will be called. Which makes this step quite 
+    heavy in terms of speed.
+3.) Then after successful copying it deletes the old memory.
+
+Note: All STL stores copy of object only, so copy constructor and overloaded assignment operator should always
+      be defined in user defined classes.
+
+How to use vector efficiently?
+---------------------------------------------------------------------
+Set the storage of vector initially using reserve() member function.
+It will reduce very heavy calls of copying and deleting if number of elements to be inserted will be larger
+than the capacity.
+
+What is iterator invalidation?
+-----------------------------
+If an iterator is pointing to some location of a vector and we delete or insert some elements anywhere in
+the vector and will use the same iterator then it will behave undefined.
+
+Remove all occurence of val from a vector in O(N) time complexity.
+------------------------------------------------------------------
+Note: erase method in vector deletes an element from vector and then it shifts rest elements by 1. so time 
+      complexity of erase in vector - O(N)
+
+      std::vector<int>::iterator it = vec.begin();
+      while(it != vec.end())
+      {
+          if(*it == elem) {
+	      it = vec.erase(it);
+          } else {
+	    it++;
+	  }
+      }
+
+      Not efficient, time complexity - O(N^2)
+
+     Efficient One:
+
+     vec.erase(std::remove(vec.begin(), vec.end(), elem), vec.end());   // erasing within iterator range
+
+     std::remove transforms the given range into a range with all the elements that compare not equal to 
+     given element shifted to the start of the container. So, actually dont remove the matched elements.
+     It just shifted the non matched to starting and gives an iterator to new valid end.
+     It just requires O(n) complexity.
+
+     It can be implemented in array also. We can shift all matching in last by swapping method in O(N) time.
+     Then Removing all elements from last in O(N) time. Total time complexity - O(N) + O(N) ~ O(N)
+
+Note: vector.reserve() is used reserve some storage in a vector. It alows writing into the vector after reserving 
+     the memory but size() of vector remains still zero. This is very dangerous.
+     vector<int> vct;
+     vct.reserve(2);
+     vct[0] = 1;  // ok
+     vct[1] = 2;  // ok
+     cout<<vct[0]<<" "<<vct[1]<<endl;   // 1 2   // ok
+     cout<<vct.size()<<endl;  // 0, danger
+     // resizing makes the vector resized
+     vct.resize(2);
+     cout<<vct.size()<<endl;   // 2. ok
+
+     Its good to use resize() instead of reserve();
+
+/*********************************** DEQUEUE ***************************************************/
+
+dequeue is very good data structure when we need to do push and pop from both the ends and access the element based
+on index as vector. 
+dequeue is list of sequential memory blocks.
+
+dequeue allows push_back, pop_back(), back(), push_front(), pop_front(), front() and many more methods.
+We can say its combination of list and vector.
+
+
+/****** Some Important Notes For different STL containers ***********************/
+
+1. [], at() provide reference so, if some containers has [] operator overloaded or at() method defined then we
+   can change values at some positions in that container.
+   Ex: strings and vector and  dequehas [] operator overloaded and at() method defined. So, we can change the 
+   value at specific index in array, strings and deque.
+   Note: If container is resized with some value, we can insert the value at specific position also by [] & at()
+   because [] & at() provides reference of value at specific index.
+   vector<int> v;
+   v.resize(10);
+   v[0] = 10; 
+   v[1] = 20; 
+   v[0] = 5;
+   v.at(1) = 3;
+
+   This is applicanle for vector, atring and deque as well. This operation takes O(1) time.
+
+2. Map and Multimap: Map and multimap is internally implemented by balanced BST. It lso has [] operatot and at()
+   method overloaded. But, here [] and at() takes key as index and provides reference of value associated with
+   the key. So, we can insert/change the value associated with the key. Here this operation takes O(logN) time
+   because it is self balanced BST.
+
+   Ex:
+   map<int, char> m;
+   m.insert(pair<int, char> (1, 'A'));   // inserting 1->A
+   m[1] = 'B';                           // modifying 1->B
+   m[2] = 'C';                           // inserting 2->C
+   m.at(3) = 'D'.                        // inserting 3->D
+   m[2] = 'D';                           // modifying 2->D
+   m.at(2) = 'E';                        // modifying 2->E
+
+   Note: This operation takes O(logN) time.
+   We can't insert duplicate value in map but we can change the value for perticular key.
+   m.insert(pair<int, char> (1, 'Z'));  // error because we have already inserted with key 1.
+
+3. Set : Set doesn't allow modification of value as it doesn't have [] operator or at() methods defined.
+   class Person{
+       public:
+       int age;
+       string name;
+       Person(int in_age, string in_name): age(in_age), name(in_name) { };
+   }
+   class mycomparator {
+      public:
+      bool operator() (Person &p1, Person &p2) {
+         return p1.age < p2.age;
+      }
+   }
+   set<Person, mycomparator> myset;
+   myset.insert(Person(30, "nikhil"));
+
+   If we need to insert some different person with same age in set then we can't do direct modification here,
+   We need to find the element, then erase the element then new element sould be inserted as below:
+   set<Person>::iterator it = myset.find(Person(30, "nikhil")); // O(logN), name could be any here, serached
+                                                                // by key (age)
+   if(it != myset.end()) {
+      myset.erase(it);    // takes O(1) , discussed later how it erase takes O(1) instead of O(logN)
+      myset.insert(person(30, "vinay"));   // takes O(logN)
+   }
+
+4. We know set is a self balanced BST and erasing and element from self balanced BST takes O(logN) time then
+   how erase() method in set takes only O(1) time ?
+
+   Ans: We know when we erase an element from self balanced BST then it takes O(logN) time in searching and O(1)
+   time in deleteion +  self balancing rotation time. In total, if we discard self balance rotation time then
+   it is O(logN) which is taken for searching. So usually for deletion it takes O(1) time only.
+
+   Here in set container each node has pointer to parent node also. erase() method takes iterator for an element,
+   means direct pointer to the element to be erased. It finds parent of this node by parent pointer and deletes
+   the current node in O(1) time then do self balncing by rotation which we are ignoring for single node.
+   For multiple deletion self balancing can take little heavy time because it can make tree most unbalanced.
+
+   Note: Set/Multiset, map/multimap has a pointer to parent in each node. So it takes O(1) time for deleting an
+   element by erase() method.
+
+/********* Operation time complexity difference between mapand unordered_map  ***********************/
+
+> Map : implemented by self balanced BST |  unordered_map : implemented by hashing mechanism(hash table).
+> Map : serach time O(logN). | unordered_map : O(1) if no collision, upto O(n) if there are hash collisions.
+> Map : insertion time O(logN) + balance | unordered_map : same as search
+> Map : deletion time O(logN) + balance  | unordered_map : same as search
+> Map : usage when order is required     | unordered_map : in all other cases.
+
+Note: whenever you think of using map, check if order is required. If order is not required then unordered_map
+      is better fit in order to reduce time complexity.
+
+/******** What is the difference between vector and deque **************************/
+
+Mostly both are same, Only difference is we can push/pop elements from both the ends in deque.
+vector: push_back, pop_back
+deque : push_back, pop_back, push_front(), pop_front
+
+/******* What is difference between std::list and std::forward_list *****************/
+
+std::list is a doubly linked list internally though, std::forward_list is a singly linked list.
+std::forward_list is introduced in c++11.
+
+std::list  // push_back, pop_back, push_front, pop_front
+std::forward_list  // only push_front, pop_front
+
+template <typename T>
+void DisplayContents (const T& container)
+{
+  for (auto element = container.cbegin();
+     element != container.cend (); 
+     ++ element)
+     cout << *element << ' ';
+   }
+   cout << endl;
+}
+
+forward_list<int> flistIntegers{ 3, 4, 2, 2, 0 };
+flistIntegers.push_front(1);
+
+cout << "Contents of forward_list: " << endl;
+DisplayContents(flistIntegers);
+
+flistIntegers.remove(2);
+flistIntegers.sort();
+cout << "Contents after removing 2 and sorting: " << endl;
+DisplayContents(flistIntegers);
+
+Note: list provides sort() and remove() method.
+
+/****************** Find the index of an element in vector if element exists *********************/
+
+vector<int> v = { 3, 20, 5 , 8, 7, 5, 20};
+vector<int>::iterator it;
+it = std::find(v.begin(), v.end(), 5);   // if element exists, it will return the iterator to first find
+                                         // linear serch
+int index;
+if(it != v.end()) {
+  index = std::distance(v.begin(), it);   // it - v.begin()
+  index = (it - v.begin()) / sizeof(v[0]);
+}
+
+Note: we can use find_if for finding an element on certain condition
+Example: 
+
+1. find first even number.
+
+template<typename T>
+class FindEven
+{
+  public:
+  bool operator()(const T& val) {
+       return ((val % 2) == 0);
+  }
+};
+
+it = std::find_if(v.begin(), v.end(), FindEven<int>());
+
+2. find first element divisible by 3
+
+template<typename T>
+class FindDivisible
+{
+  int n;
+  public:
+  FindDivisible(int x):n(x) { }
+  
+  bool operator()(int val) {
+     return ((val%n) == 0);
+  }
+};
+
+it = find_if(v.begin(), v.end(), FindDivisible<int>(3));
+
+Note: A class overloading opertaor() as predicate is called functor clas.
+A function is called predicate when it returns true or false.
+
+As a comparator we can provide a free function or a functor class object.
+
+free function example to find first even element by find_if method:
+
+bool findeven(int val) {
+   return ((val%2) == 0);
+}
+
+Note: 
+====
+How function pointer or functor cleas object works by algorithm call, ex: find_if and many more...?
+
+Functor class has operator() overloaded. So, find_if has functor class object(obj) as comparator object.
+find_if will execute internally for each element as - obj(element)
+
+If we pass free function(func) as comparator then find_if will execute similarly for each element - fun(element)
+
+If we look closely find_if is executing similarly in both the case - obj(element) and fun(element).
+It is interesting right so, find_if doesn't have any logic to ifferenciate whether it is function object or
+functor class object, it just executes in similar fashion in both the cases.
+
+One Important concept addition for comparator use in stl
+========================================================
+
+I have noticed, when we use algorithm functions, ex: std::sort etc then we need to pass mycomp() as comparator
+object, though if we use stl tempelated class then mycomp() throws error and only mycomp works for that.
+
+class student 
+{
+  public:
+  int age;
+  int marks;
+};
+
+class mycomp
+{
+   public:
+   bool operator()(const student& obj1, const student& obj2) {
+      return obj1.marks > obj2.marks;
+   }
+};
+
+vector<student> vct;
+sort(vct.begin(), vct.end(), mycomp());
+
+// initialize a heap
+priority_queue<student, vector<student>, mycomp> pq;   // mycomp() throws error
+// the above statement is not correct, mycomp() means object of struct/class. It is only passed in algorithmic
+// function as sort, find etc..function or lambda function is also used in algorithmic functions only.
+// This is declaration os priority queue.
+// It is to remmeber that there are two ways of declaration of priority queue, set, map can be done.
+// 1. either we need to pass the functor class/struct name as mycomp (not mycomp()// an object)
+// 2. or we need to verload the operator > in the user defined class 
+// Example of overloading > operator in above student class
+   bool operator > (const A& obj)
+   {
+      return marks > obj.marks;
+   }
+   Note: overload < operator in for ascending order insertion.
+
+
+// priority_queue doesn't support iterator.
+// It supports - empty(), size(), top(), pop()
+// Default priority queue is max heap, to make it min heap we need to overload comparator by greater
+// priority_queue<int, vector<int>, greater<int>>
+// above mentioned mycomp class functor will be used to make min heap as we are using > inside overloaded ()
+// operaor function
+
+set<student, mycomp> st;
+set<student, mycomp>::iterator it;
+
+map<student, int, mycomp> mp;
+map<student, int, mycomp>::iterator it;
+
+/***************** unordered_map important points ************************************/
+
+Unordered_map keeps adding new elements on top and doesn't insert new pair with same key.
+
+unordered_map<int, char> mymap;
+mymap.insert(make_pair(1, 'a'));
+mymap.insert(make_pair(2, 'b'));
+mymap.insert(make_pair(1, 'c'));
+unordered_map<int, char>::iterator it;
+for(it = mymap.begin(); it != mymap.end(); it++){
+   cout<<"Key: "<<it->first<<" value: "<<it->second<<endl;
+}
+
+output:
+Key: 2 value: b
+Key: 1 value: a
+
+Qn: How to insert a user defined custom object in unordered_map.
+    We need to overload hasher function and == operator.
+
+https://thispointer.com//using-unordered_set-with-custom-hasher-and-comparision-function/
+
+======================================================================================================
+Qn : We know [] operator provides reference to mapped value of key then if key doesn't exist in map/set then what
+will happen?
+
+If k matches the key of an element in the container, the function returns a reference to its mapped value.
+
+If k does not match the key of any element in the container, the function inserts a new element with that key and returns a reference to its mapped value. Notice that this always increases the container size by one, even if no mapped value is assigned to the element (the element is constructed using its default constructor).
+
+A similar member function, map::at, has the same behavior when an element with the key exists, but throws an exception when it does not.
+
+Example:
+
+std::map<char,std::string> mymap;
+
+mymap['a']="nikhil"
+mymap['b'] = "vinay"
+
+cout<<mymap['c']<<endl;    // prints empty
+cout<<mymap.size()<<endl;  // prints 3 because previous statement inserted an key-vale pair for (key-'c',val-empty)
+
+====================================================================================================
+
+============ Iterator with string , Can sort subpart of string as well =================
+
+string digits = "15897";
+string::iterator start = digits.begin();
+sort(start + 2 , digits.end());  // 15789
+
+===================================================================================
+

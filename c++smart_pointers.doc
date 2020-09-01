@@ -1,0 +1,133 @@
+/************************ SMART POINTER ***********************************/
+
+ https://www.codeproject.com/Articles/8394/Smart-Pointers-to-boost-your-code
+
+// Shared_ptr
+
+> It is thread safe
+> shared_ptr is thread safe
+> Works on reference count principle
+
+class CSample
+{
+  int a;
+  public:
+  CSample():a(2) { } 
+};
+
+vvoid Sample2_Shared()
+{ 
+  // (A) create a new CSample instance with one reference
+  shared_ptr<CSample> mySample(new CSample); 
+  printf("The Sample now has %i references\n", mySample.use_count()); // should be 1
+
+  // (B) assign a second pointer to it, copy constructor of shared_ptr class is called. Both points to same obj.
+  shared_ptr<CSample> mySample2 = mySample; // should be 2 refs by now
+  printf("The Sample now has %i references\n", mySample.use_count());
+
+  // (C) set the first pointer to NULL
+  mySample.reset(); 
+  printf("The Sample now has %i references\n", mySample2.use_count());  // 1
+
+  // the object allocated in (1) is deleted automatically
+  // when mySample2 goes out of scope
+}
+
+============ Use in container ============================
+
+Many container classes, including the STL containers, require copy operations (e.g., when inserting an existing element into a list, vector, or container). However, when this copy operations are expensive (or are even unavailable), the typical solution is to use a container of pointers:
+
+std::vector<CMyLargeClass *> vec;
+vec.push_back( new CMyLargeClass("bigString") );
+However, this throws the task of memory management back to the caller. We can, however, use a shared_ptr:
+
+typedef std::shared_ptr<CMyLargeClass>  CMyLargeClassPtr;
+std::vector<CMyLargeClassPtr> vec;
+vec.push_back( CMyLargeClassPtr(new CMyLargeClass("bigString")) );
+
+Very similar, but now, the elements get destroyed automatically when the vector is destroyed - unless, of course, there's another smart pointer still holding a reference.
+
+void Sample3_Container()
+{
+  typedef boost::shared_ptr<CSample> CSamplePtr;
+
+  // (A) create a container of CSample pointers:
+  std::vector<CSamplePtr> vec;
+
+  // (B) add three elements
+  vec.push_back(CSamplePtr(new CSample));
+  vec.push_back(CSamplePtr(new CSample));
+  vec.push_back(CSamplePtr(new CSample));
+
+  // (C) "keep" a pointer to the second: 
+  CSamplePtr anElement = vec[1];
+
+  // (D) destroy the vector:
+  vec.clear();
+
+  // (E) the second element still exists
+  anElement->Use();
+  printf("done. cleanup is automatic\n");
+
+  // (F) anElement goes out of scope, deleting the last CSample instance
+}
+
+========= cyclic reference ==========================
+
+Reference counting is a convenient resource management mechanism, it has one fundamental drawback though: cyclic references are not freed automatically, and are hard to detect by the computer. The simplest example is this:
+
+struct CDad;
+struct CChild;
+
+typedef boost::shared_ptr<CDad>   CDadPtr;
+typedef boost::shared_ptr<CChild> CChildPtr;
+
+
+struct CDad : public CSample
+{
+   CChildPtr myBoy;
+};
+
+struct CChild : public CSample
+{
+  CDadPtr myDad;
+};
+
+// a "thing" that holds a smart pointer to another "thing":
+
+CDadPtr   parent(new CDad); 
+CChildPtr child(new CChild);
+
+// deliberately create a circular reference:
+parent->myBoy = child; 
+child->myDad = dad;
+
+
+// resetting one ptr...
+child.reset();
+
+If we now call dad.reset(), we lose all "contact" with the two objects. But this leaves both with exactly one reference, and the shared pointers see no reason to delete either of them! We have no access to them anymore, but they mutually keep themselves "alive". This is a memory leak at best; in the worst case, the objects hold even more critical resources that are not released correctly.
+
+Note: weak_ptr is used to break the cycles.
+
+Strong vs. Weak References:
+
+A strong reference keeps the referenced object alive (i.e., as long as there is at least one strong reference to the object, it is not deleted). boost::shared_ptr acts as a strong reference. In contrast, a weak reference does not keep the object alive, it merely references it as long as it lives.
+
+Note that a raw C++ pointer in this sense is a weak reference. However, if you have just the pointer, you have no ability to detect whether the object still lives.
+
+boost::weak_ptr<T> is a smart pointer acting as weak reference. When you need it, you can request a strong (shared) pointer from it. (This can be NULL if the object was already deleted.) Of course, the strong pointer should be released immediately after use. In the above sample, we can decide to make one pointer weak:
+
+struct CBetterChild : public CSample
+{
+  weak_ptr<CDad> myDad;
+
+  void BringBeer()
+  {
+    shared_ptr<CDad> strongDad = myDad.lock(); // request a strong pointer
+    if (strongDad)                      // is the object still alive?
+      strongDad->SetBeer();
+    // strongDad is released when it goes out of scope.
+    // the object retains the weak pointer
+  }
+};

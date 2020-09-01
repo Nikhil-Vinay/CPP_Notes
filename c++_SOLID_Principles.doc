@@ -1,0 +1,116 @@
+/************************* SOLID DESIGN PRINCIPLES ****************************************/
+
+Why do we need design?
+
+Software keeps changing. We need to design software based on some basic philosophy:
+1. Don't repeat yourself. (Don't have duplicates, if changes happens, need to be changed at all places)
+2. Design should be open for extension and closed for modification 
+
+There are 5 design principles in c++. It is applicable for all kind of object oriented programming.
+
+S  -  Single Responsibilty
+O  -  Open For Extension, Closed For Modification 
+L  -  LISCOV Substitution
+I  -  Interface Segregation 
+D  -  Dpendancy Inversion
+
+============================== Single Responsibility ================================== 
+
+Class should have only one reason to change. A class should not get mingled with many functionalities. try to
+have different classes for different functionalities.
+
+Example: Design a member class for tennis
+
+class Member
+{
+   // need to have only member specific data and methods as member id, age etc
+   // don't have MakeBooking method here. We can have a different class called Booking.
+   // So if any changes happens related to booking, we need to make change in booking class only not in Member
+   // class   
+}
+
+============================ Open For Extension and Closed For Modification ================
+
+In online booking, payment will be involved. 
+if(p.type == "Cash")
+   // cash logic
+if(p.type == "card")
+   // card logic
+problem with this code is what will be done if tomorrow new payment is added (paytm, different wallet etc).
+Writing another if condition is not good, we need to close for modification.
+
+We should have an interface called IPayment, CashPayment, CardPayment class will be implementing the interface
+Ipayment.
+If tomorrow another payment method will be added, we just need to create another class implementing the inteface
+IPayment.
+
+============================ LISCOV substitution Principle =====================================
+
+============================ Interface Segregation =============================================
+
+Any client should not be inforced to implement any irrelevant method(interface).
+
+Example: Suppose there is an interface called IPayment with two methods:
+class IPayment
+{
+  public:
+  void SavePaymentDetials() = 0;   // save payment id, payment amount etc
+  void SaveCardDetails() = 0;      // Save details for card used in payment
+};
+
+Now class CounterCardPayment and OnlineCardPayment can implement this method beautifully but if we create a class
+for CashPayment then CashPayment class will be forced to have 'SaveCardDetails' method defined though it doesn't
+have any data for Card. This is violating the Interface Segregation design principle.
+
+So, We need to segregate the interface into two different interface IPayment and ICardPayment.
+class IPayment
+{
+  public:
+  void SavePaymentDetials() = 0;   // save payment id, payment amount etc
+};
+
+class ICardPayment
+{
+  public:
+  void SaveCardDetails() = 0;      // Save details for card used in payment
+};
+
+CashPayment class will implement only IPayment interface but CardPayment will implement both the interfaces.
+
+
+========================= Dependancy Inversion Principle ===========================================
+
+The responsibility of creation of dependent object should be outsourced to consuming class.
+
+[ The best way of management to outsource the responsibility to your team members. ]
+
+class Booking
+{
+   IPayment *payment;
+   public:
+   Booking(int ptype)  // constructor
+   {
+      if(ptype == CASH) {
+         payment = new CashPayment();
+      } else if(ptype = CARD) {
+         payment = new CardPayment();
+      }
+   }
+}
+
+In the above class implementaion, there is problem that class Booking is deciding and creating payment object 
+based on that but, Booking class nothing has to do with payment. So it is violating the dependancy inversion
+principle.
+
+Appropriate payment object creation should be outsourced to the class whoever is consuming(creating) the 
+Booking object.
+
+class Booking
+{
+   IPayment *payment;
+   public:
+   Booking(IPayment* iPayment)  // constructor
+   {
+      payment = iPayment;
+   }   
+}

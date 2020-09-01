@@ -1,0 +1,109 @@
+char str[20];   // static size, it can't be modified later
+char* str = new char[length];  // dynamically allocated at runtime after finding length
+                               // if string size increases length then we need to allocate new memory then
+                               // copy contenet of str then delete str // delete[] str;
+
+===== String initialization =========================
+
+string str("nikhil");
+string str2(str);
+
+string str = "nikhil";
+string str3 = str2;
+string str4(10, 'a');   // 10 time 'a'
+
+string str5(str, 3);   // first 3 characters
+
+string str6;
+str6.push_back('a');
+str6.push_back('b');
+
+========= String acess methods ========================
+
+1. by index with help of overloaded [] operator. It provide reference of the character at index
+
+string str("nikhil");
+char ch = str[1];  // i
+str[0] = 'p';      // now string is "pikhil"
+
+2. by index with help of at() method. It provide reference of the character at inde
+
+string str("nikhil");
+char ch = str.at(1);  // i
+str.at(0) = 'p';      // now string is "pikhil" 
+
+===== String concatenate and append ========================
+
+string str("nikhil");
+string str2 += str + "vinay";
+ str += str2;
+str.append(str2);
+
+===== String has find member function with some overloaded functions =============
+
+string sampleStr ("Good day String! Today is beautiful!");
+size_t charPos = sampleStr.find ("day", 0);
+size_t charPos = sampleStr.find ("day");
+
+// Check if the substring was found, compare against string::npos
+if (charPos != string::npos) {
+   cout << "First instance of \"day\" was found at position " << charPos;
+} else {
+   cout << "Substring not found." << endl;
+}
+
+====== Finding substring of a string ========================
+
+string str("nikhil");
+//string str2 =  str1.substr(start_index, length);
+string str2 =  str1.substr(1, 2);  // ik
+
+====== Truncating stl string =================================
+
+erase() is used to remove the characters from string.
+A number of characters when given an offset position and count.
+
+string sampleStr ("Hello String! Wake up to a beautiful day!");
+isampleStr.erase (13, 28); // Hello String!
+
+string::iterator it = str.find(str.begin(), str.end(), 'S');
+auto it = str.find(str.begin(), str.end(), 'S');   //c++11
+sampleStr.erase (it); // iterator points to a specific character
+
+sampleStr.erase (sampleStr.begin (), sampleStr.end ()); // erase by iterator range
+
+========= String Reversal ======================================
+
+string sampleStr ("Hello String! We will reverse you!");
+reverse (sampleStr.begin (), sampleStr.end ());   // reverse with help of iterator
+
+======== Case conversion in string =============================
+
+cout << "Please enter a string for case-convertion:" << endl;
+cout << "> ";
+
+string inStr;
+getline (cin, inStr);
+cout << endl;
+
+transform(inStr.begin(), inStr.end(), inStr.begin(), ::toupper);  // function toupper is applied on each char
+cout << "The string converted to upper case is: " << endl;
+cout << inStr << endl << endl;
+
+transform(inStr.begin(), inStr.end(), inStr.begin(), ::tolower);
+cout << "The string converted to lower case is: " << endl;
+cout << inStr << endl << endl;
+
+======== Convert c++ string to C string ================
+
+char* ptr = null;
+string str("nikhil");
+ptr = str.c_str();
+
+============ Iterator with string , Can sort subpart of string as well =================
+
+string digits = "15897";
+string::iterator start = digits.begin();
+sort(start + 2 , digits.end());  // 15789
+
+====================================================================================
